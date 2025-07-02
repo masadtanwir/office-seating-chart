@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Seating Chart - Visual Layout</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .day-selector {
+            background: #f8fafc;
+            padding: 25px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .day-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .day-tab {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .day-tab:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .day-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .office-layout {
+            padding: 40px;
+            background: #f8fafc;
+        }
+        
+        .office-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .office-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .seating-grid {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+        
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        
+        .row-label {
+            font-weight: bold;
+            color: #475569;
+            font-size: 1.1rem;
+            min-width: 80px;
+            text-align: center;
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .seat {
+            width: 120px;
+            height: 100px;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .seat:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .seat.occupied {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-color: #059669;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .seat.empty {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            border-style: dashed;
+            color: #64748b;
+        }
+        
+        .seat-number {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .employee-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+            line-height: 1.1;
+            margin-bottom: 2px;
+        }
+        
+        .employee-role {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            text-align: center;
+            line-height: 1;
+        }
+        
+        .special-indicator {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            color: #f59e0b;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .empty-text {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+        
+        .meeting-room {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            border: 3px solid #8b5cf6;
+        }
+        
+        .meeting-room h3 {
+            color: #8b5cf6;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .asad-card {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+            font-weight: 600;
+        }
+        
+        .wfh-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .wfh-section h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .wfh-employees {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .wfh-card {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .legend {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .legend h3 {
+            margin-bottom: 20px;
+            color: #1e293b;
+            text-align: center;
+        }
+        
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-sample {
+            width: 40px;
+            height: 30px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+        
+        .sample-occupied {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .sample-empty {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+        }
+        
+        .sample-meeting {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+        
+        .sample-wfh {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .seating-grid {
+                padding: 20px;
+            }
+            
+            .row {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .seat {
+                width: 90px;
+                height: 80px;
+            }
+            
+            .employee-name {
+                font-size: 0.7rem;
+            }
+            
+            .employee-role {
+                font-size: 0.6rem;
+            }
+            
+            .office-stats {
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 10px 15px;
+            }
+            
+            .day-tabs {
+                gap: 3px;
+            }
+            
+            .day-tab {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🪑 Office Seating Chart</h1>
+            <p>Visual layout • 3 rows × 6 seats • 18 total capacity</p>
+        </div>
+        
+        <div class="day-selector">
+            <div class="day-tabs">
+                <button class="day-tab active" onclick="showDay('Monday')">Monday</button>
+                <button class="day-tab" onclick="showDay('Tuesday')">Tuesday</button>
+                <button class="day-tab" onclick="showDay('Wednesday')">Wednesday</button>
+                <button class="day-tab" onclick="showDay('Thursday')">Thursday</button>
+                <button class="day-tab" onclick="showDay('Friday')">Friday</button>
+            </div>
+        </div>
+        
+        <div class="office-layout">
+            <div class="office-info">
+                <h2 id="currentDay">Monday Schedule</h2>
+                <div class="office-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="occupiedCount">18</div>
+                        <div class="stat-label">Occupied Seats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="emptyCount">0</div>
+                        <div class="stat-label">Empty Seats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="wfhCount">3</div>
+                        <div class="stat-label">Working from Home</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="seating-grid">
+                <!-- Row 1 -->
+                <div class="row">
+                    <div class="row-label">Row 1</div>
+                    <div class="seat" data-seat="1">
+                        <div class="seat-number">1</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="2">
+                        <div class="seat-number">2</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="3">
+                        <div class="seat-number">3</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="4">
+                        <div class="seat-number">4</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="5">
+                        <div class="seat-number">5</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="6">
+                        <div class="seat-number">6</div>
+                        <div class="employee-info"></div>
+                    </div>
+                </div>
+                
+                <!-- Row 2 -->
+                <div class="row">
+                    <div class="row-label">Row 2</div>
+                    <div class="seat" data-seat="7">
+                        <div class="seat-number">7</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="8">
+                        <div class="seat-number">8</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="9">
+                        <div class="seat-number">9</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="10">
+                        <div class="seat-number">10</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="11">
+                        <div class="seat-number">11</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="12">
+                        <div class="seat-number">12</div>
+                        <div class="employee-info"></div>
+                    </div>
+                </div>
+                
+                <!-- Row 3 -->
+                <div class="row">
+                    <div class="row-label">Row 3</div>
+                    <div class="seat" data-seat="13">
+                        <div class="seat-number">13</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="14">
+                        <div class="seat-number">14</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="15">
+                        <div class="seat-number">15</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="16">
+                        <div class="seat-number">16</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="17">
+                        <div class="seat-number">17</div>
+                        <div class="employee-info"></div>
+                    </div>
+                    <div class="seat" data-seat="18">
+                        <div class="seat-number">18</div>
+                        <div class="employee-info"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Meeting Room -->
+            <div class="meeting-room">
+                <h3>📋 Meeting Room</h3>
+                <div class="asad-card">
+                    Asad - Technical Project Manager<br>
+                    <small>Always present (separate from 18 seats)</small>
+                </div>
+            </div>
+            
+            <!-- WFH Section -->
+            <div class="wfh-section">
+                <h3>🏠 Working from Home</h3>
+                <div class="wfh-employees" id="wfhEmployees">
+                    <!-- WFH employees will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="legend">
+                <h3>📝 Legend</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-sample sample-occupied"></div>
+                        <span>Occupied Seat</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-sample sample-empty"></div>
+                        <span>Empty Seat</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-sample sample-meeting"></div>
+                        <span>Meeting Room</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-sample sample-wfh"></div>
+                        <span>Working from Home</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="color: #f59e0b; font-size: 1.2rem;">★</span>
+                        <span>Special Case (2 WFH days)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Complete schedule data from our previous analysis
+        const scheduleData = {
+            'Monday': {
+                office: [
+                    { name: 'Abdulla BA', role: 'Business Analyst', seat: 1 },
+                    { name: 'Abdullah SA', role: 'Solution Architect', seat: 2 },
+                    { name: 'AbuBakar', role: 'QA', seat: 3 },
+                    { name: 'Adnan', role: 'Back End Django', seat: 4 },
+                    { name: 'Arslan Baig', role: 'Front End Vue JS', seat: 5 },
+                    { name: 'Azlan', role: 'Front End Vue JS', seat: 6 },
+                    { name: 'Dua', role: 'Intern', seat: 7 },
+                    { name: 'Hamza', role: 'Technical Writer', seat: 8 },
+                    { name: 'Hani', role: 'Business Analyst', seat: 9 },
+                    { name: 'Hina', role: 'QA', seat: 10 },
+                    { name: 'Hyder', role: 'Back End Django', seat: 11 },
+                    { name: 'Kalim', role: 'QA', seat: 12 },
+                    { name: 'Nabiha', role: 'Back End Django', seat: 13 },
+                    { name: 'Nouman', role: 'Back End Django', seat: 14 },
+                    { name: 'Shahbaz', role: 'Back End Django', seat: 15 },
+                    { name: 'Umair', role: 'QA', seat: 16 },
+                    { name: 'Yaseen', role: 'Back End Django', seat: 17, special: true },
+                    { name: 'Zain Hashmi', role: 'QA', seat: 18, special: true }
+                ],
+                wfh: ['Fasih', 'Javeria', 'Waqar Khatana']
+            },
+            'Tuesday': {
+                office: [
+                    { name: 'Abdulla BA', role: 'Business Analyst', seat: 1 },
+                    { name: 'Abdullah SA', role: 'Solution Architect', seat: 2 },
+                    { name: 'AbuBakar', role: 'QA', seat: 3 },
+                    { name: 'Adnan', role: 'Back End Django', seat: 4 },
+                    { name: 'Arslan Baig', role: 'Front End Vue JS', seat: 5 },
+                    { name: 'Azlan', role: 'Front End Vue JS', seat: 6 },
+                    { name: 'Dua', role: 'Intern', seat: 7 },
+                    { name: 'Fasih', role: 'Back End Django', seat: 8 },
+                    { name: 'Hamza', role: 'Technical Writer', seat: 9 },
+                    { name: 'Hina', role: 'QA', seat: 10 },
+                    { name: 'Hyder', role: 'Back End Django', seat: 11 },
+                    { name: 'Javeria', role: 'QA', seat: 12 },
+                    { name: 'Kalim', role: 'QA', seat: 13 },
+                    { name: 'Nouman', role: 'Back End Django', seat: 14 },
+                    { name: 'Shahbaz', role: 'Back End Django', seat: 15 },
+                    { name: 'Umair', role: 'QA', seat: 16 },
+                    { name: 'Waqar Khatana', role: 'Back End Django', seat: 17, special: true },
+                    { name: 'Zain Hashmi', role: 'QA', seat: 18, special: true }
+                ],
+                wfh: ['Hani', 'Nabiha', 'Yaseen']
+            },
+            'Wednesday': {
+                office: [
+                    { name: 'Abdulla BA', role: 'Business Analyst', seat: 1 },
+                    { name: 'Abdullah SA', role: 'Solution Architect', seat: 2 },
+                    { name: 'AbuBakar', role: 'QA', seat: 3 },
+                    { name: 'Arslan Baig', role: 'Front End Vue JS', seat: 4 },
+                    { name: 'Azlan', role: 'Front End Vue JS', seat: 5 },
+                    { name: 'Fasih', role: 'Back End Django', seat: 6 },
+                    { name: 'Hamza', role: 'Technical Writer', seat: 7 },
+                    { name: 'Hani', role: 'Business Analyst', seat: 8 },
+                    { name: 'Hyder', role: 'Back End Django', seat: 9 },
+                    { name: 'Javeria', role: 'QA', seat: 10 },
+                    { name: 'Kalim', role: 'QA', seat: 11 },
+                    { name: 'Nabiha', role: 'Back End Django', seat: 12 },
+                    { name: 'Shahbaz', role: 'Back End Django', seat: 13 },
+                    { name: 'Umair', role: 'QA', seat: 14 },
+                    { name: 'Yaseen', role: 'Back End Django', seat: 15, special: true }
+                ],
+                wfh: ['Adnan', 'Dua', 'Hina', 'Nouman', 'Waqar Khatana', 'Zain Hashmi']
+            },
+            'Thursday': {
+                office: [
+                    { name: 'Abdulla BA', role: 'Business Analyst', seat: 1 },
+                    { name: 'Abdullah SA', role: 'Solution Architect', seat: 2 },
+                    { name: 'Adnan', role: 'Back End Django', seat: 3 },
+                    { name: 'Arslan Baig', role: 'Front End Vue JS', seat: 4 },
+                    { name: 'Dua', role: 'Intern', seat: 5 },
+                    { name: 'Fasih', role: 'Back End Django', seat: 6 },
+                    { name: 'Hani', role: 'Business Analyst', seat: 7 },
+                    { name: 'Hina', role: 'QA', seat: 8 },
+                    { name: 'Hyder', role: 'Back End Django', seat: 9 },
+                    { name: 'Javeria', role: 'QA', seat: 10 },
+                    { name: 'Nabiha', role: 'Back End Django', seat: 11 },
+                    { name: 'Nouman', role: 'Back End Django', seat: 12 },
+                    { name: 'Umair', role: 'QA', seat: 13 },
+                    { name: 'Waqar Khatana', role: 'Back End Django', seat: 14, special: true },
+                    { name: 'Zain Hashmi', role: 'QA', seat: 15, special: true }
+                ],
+                wfh: ['AbuBakar', 'Azlan', 'Hamza', 'Kalim', 'Shahbaz', 'Yaseen']
+            },
+            'Friday': {
+                office: [
+                    { name: 'AbuBakar', role: 'QA', seat: 1 },
+                    { name: 'Adnan', role: 'Back End Django', seat: 2 },
+                    { name: 'Azlan', role: 'Front End Vue JS', seat: 3 },
+                    { name: 'Fasih', role: 'Back End Django', seat: 4 },
+                    { name: 'Hamza', role: 'Technical Writer', seat: 5 },
+                    { name: 'Hani', role: 'Business Analyst', seat: 6 },
+                    { name: 'Hina', role: 'QA', seat: 7 },
+                    { name: 'Javeria', role: 'QA', seat: 8 },
+                    { name: 'Kalim', role: 'QA', seat: 9 },
+                    { name: 'Nabiha', role: 'Back End Django', seat: 10 },
+                    { name: 'Nouman', role: 'Back End Django', seat: 11 },
+                    { name: 'Shahbaz', role: 'Back End Django', seat: 12 },
+                    { name: 'Waqar Khatana', role: 'Back End Django', seat: 13, special: true },
+                    { name: 'Yaseen', role: 'Back End Django', seat: 14, special: true }
+                ],
+                wfh: ['Abdulla BA', 'Abdullah SA', 'Arslan Baig', 'Dua', 'Hyder', 'Umair', 'Zain Hashmi']
+            }
+        };
+
+        let currentDay = 'Monday';
+
+        function showDay(day) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.day-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            currentDay = day;
+            
+            // Update day title
+            document.getElementById('currentDay').textContent = day + ' Schedule';
+            
+            // Clear all seats first
+            document.querySelectorAll('.seat').forEach(seat => {
+                seat.classList.remove('occupied', 'empty');
+                seat.classList.add('empty');
+                const employeeInfo = seat.querySelector('.employee-info');
+                employeeInfo.innerHTML = '<div class="empty-text">Available</div>';
+            });
+            
+            // Get data for selected day
+            const dayData = scheduleData[day];
+            
+            if (dayData && dayData.office) {
+                // Populate occupied seats
+                dayData.office.forEach(employee => {
+                    const seatElement = document.querySelector('[data-seat="' + employee.seat + '"]');
+                    if (seatElement) {
+                        seatElement.classList.remove('empty');
+                        seatElement.classList.add('occupied');
+                        
+                        const employeeInfo = seatElement.querySelector('.employee-info');
+                        employeeInfo.innerHTML = 
+                            (employee.special ? '<div class="special-indicator">★</div>' : '') +
+                            '<div class="employee-name">' + employee.name + '</div>' +
+                            '<div class="employee-role">' + employee.role + '</div>';
+                    }
+                });
+                
+                // Update WFH section
+                const wfhContainer = document.getElementById('wfhEmployees');
+                if (dayData.wfh && dayData.wfh.length > 0) {
+                    wfhContainer.innerHTML = dayData.wfh.map(name => 
+                        '<div class="wfh-card">' + name + '</div>'
+                    ).join('');
+                } else {
+                    wfhContainer.innerHTML = '<div class="wfh-card">No one working from home</div>';
+                }
+                
+                // Update statistics
+                const occupiedSeats = dayData.office.length;
+                const emptySeats = 18 - occupiedSeats;
+                const wfhCount = dayData.wfh ? dayData.wfh.length : 0;
+                
+                document.getElementById('occupiedCount').textContent = occupiedSeats;
+                document.getElementById('emptyCount').textContent = emptySeats;
+                document.getElementById('wfhCount').textContent = wfhCount;
+            }
+        }
+
+        // Initialize with Monday when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            showDay('Monday');
+        });
+
+        // Add click handlers to seats
+        document.querySelectorAll('.seat').forEach(seat => {
+            seat.addEventListener('click', function() {
+                const seatNumber = this.dataset.seat;
+                const isOccupied = this.classList.contains('occupied');
+                
+                if (isOccupied) {
+                    const employeeName = this.querySelector('.employee-name');
+                    const employeeRole = this.querySelector('.employee-role');
+                    if (employeeName && employeeRole) {
+                        alert('Seat ' + seatNumber + ':\n' + employeeName.textContent + '\n' + employeeRole.textContent);
+                    }
+                } else {
+                    alert('Seat ' + seatNumber + ': Available');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
